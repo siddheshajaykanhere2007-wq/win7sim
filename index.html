@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Windows 7 Ultimate Simulator</title>
+    <style>
+        * { box-sizing: border-box; user-select: none; -ms-user-select: none; font-family: "Segoe UI", Arial, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
+
+        /* ================= 1. BOOT SEQUENCE SCREEN ================= */
+        #boot-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: black; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; z-index: 9999;
+        }
+        .logo-container { width: 100px; height: 100px; position: relative; margin-bottom: 20px; }
+        .orb {
+            position: absolute; width: 40px; height: 40px; border-radius: 50%;
+            opacity: 0; animation: glowOrb 4s infinite ease-in-out;
+        }
+        .orb-red    { background: #ff4b4b; top: 10px; left: 10px; animation-delay: 0s; }
+        .orb-green  { background: #4bfe4b; top: 10px; right: 10px; animation-delay: 0.5s; }
+        .orb-blue   { background: #4b4bfe; bottom: 10px; left: 10px; animation-delay: 1s; }
+        .orb-yellow { background: #fefe4b; bottom: 10px; right: 10px; animation-delay: 1.5s; }
+        
+        @keyframes glowOrb {
+            0%, 100% { opacity: 0; transform: scale(0.6); filter: blur(5px); }
+            50% { opacity: 0.9; transform: scale(1.1); filter: blur(2px); box-shadow: 0 0 15px white; }
+        }
+        .boot-text { color: white; font-size: 20px; letter-spacing: 1px; font-weight: 300; margin-top: 20px; }
+
+        /* ================= 2. INSTALLATION / SETUP WIZARD ================= */
+        #setup-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #1d5893 0%, #092147 100%);
+            display: none; align-items: center; justify-content: center; z-index: 9990;
+        }
+        .setup-window {
+            width: 550px; background-color: #f0f0f0; border-radius: 5px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid #666;
+        }
+        .setup-header { background: linear-gradient(to bottom, #7abcff 0%, #4096ee 100%); color: white; padding: 10px 15px; font-weight: bold; }
+        .setup-body { padding: 30px; color: #333; }
+        .progress-container { width: 100%; background-color: #e0e0e0; height: 22px; border-radius: 3px; border: 1px solid #ccc; overflow: hidden; margin-top: 20px; }
+        .progress-bar { width: 0%; height: 100%; background: linear-gradient(to bottom, #a1db58 0%, #60bb20 100%); transition: width 0.1s linear; }
+        .setup-btn {
+            background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
+            border: 1px solid #707070; padding: 6px 25px; cursor: pointer; border-radius: 3px; font-size: 13px;
+        }
+        .setup-btn:hover { background: linear-gradient(to bottom, #eaf2fb 0%, #b7d5f5 100%); border-color: #3c7fb1; }
+
+        /* ================= 3. DESKTOP & ENVIRONMENT ================= */
+        #desktop-environment {
+            position: relative; width: 100%; height: 100%;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920') no-repeat center center;
+            background-size: cover; display: none; transition: background 0.5s ease;
+        }
+
+        /* Standard Window Archetypes */
+        .window {
+            position: absolute; top: 100px; left: 150px; width: 450px;
+            background: rgba(240, 245, 255, 0.9); border-radius: 7px 7px 0 0;
+            border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            display: none; flex-direction: column; z-index: 10;
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+        }
+        .window-header {
+            background: linear-gradient(to bottom, rgba(255,255,255,0.6) 0%, rgba(200,220,245,0.4) 100%);
+            padding: 8px 12px; font-size: 13px; font-weight: 500; color: #1e395b;
+            display: flex; justify-content: space-between; align-items: center;
+            border-radius: 6px 6px 0 0; border-bottom: 1px solid rgba(0,0,0,0.1); cursor: move;
+        }
+        .window-controls button {
+            width: 26px; height: 18px; font-size: 11px; margin-left: 2px;
+            background-color: rgba(255,255,255,0.5); border: 1px solid #aaa; border-radius: 2px; cursor: pointer;
+        }
+        .window-controls .close-btn:hover { background-color: #e81123; color: white; border-color: #e81123; }
+        .window-body { padding: 15px; background: white; flex: 1; min-height: 150px; border: 1px solid #999; margin: 0 4px 4px 4px; }
+
+        /* Aero Glass Taskbar Base */
+        .taskbar {
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
+            background: linear-gradient(to bottom, rgba(200, 225, 255, 0.4) 0%, rgba(100, 150, 200, 0.2) 100%);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid rgba(255,255,255,0.4);
+            display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 999;
+        }
+        .start-orb {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: radial-gradient(circle, #5caefd 0%, #1c529e 70%, #0a2046 100%);
+            border: 1px solid #3366cc; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5), inset 0 2px 4px rgba(255,255,255,0.6);
+            transition: transform 0.1s;
+        }
+        .start-orb:hover { transform: scale(1.05); box-shadow: 0 0 12px #5caefd; }
+        .start-orb-flag { font-size: 16px; transform: rotate(-5deg); }
+
+        .system-tray {
+            background: rgba(255,255,255,0.15); border-left: 1px solid rgba(255,255,255,0.2);
+            padding: 4px 12px; color: white; font-size: 12px; text-shadow: 1px 1px 2px black;
+            font-weight: bold; text-align: center; border-radius: 3px;
+        }
+
+        /* Aero Start Menu */
+        .start-menu {
+            position: absolute; bottom: 42px; left: 5px; width: 380px; height: 450px;
+            background: rgba(235, 245, 255, 0.85); border: 1px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(15px); border-radius: 5px 5px 0 0;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.4); display: none; z-index: 998; padding: 6px;
+        }
+        .start-menu-inner { display: flex; width: 100%; height: 100%; }
+        .start-left { width: 65%; background: white; border-radius: 3px; padding: 10px; border: 1px solid #ccc; }
+        .start-right { width: 35%; padding: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+        .start-item { padding: 6px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; color: #333; display: flex; align-items: center; gap: 8px; }
+        .start-item:hover { background: linear-gradient(to bottom, #eaf2fb 0%, #b7d5f5 100%); }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SYSTEM BOOT ANIMATION LAYER -->
+    <div id="boot-screen">
+        <div class="logo-container">
+            <div class="orb orb-red"></div>
+            <div class="orb orb-green"></div>
+            <div class="orb orb-blue"></div>
+            <div class="orb orb-yellow"></div>
+        </div>
+        <div class="boot-text">Starting Windows</div>
+    </div>
+
+    <!-- 2. SIMULATED SYSTEM INSTALLATION SCREEN -->
+    <div id="setup-screen">
+        <div class="setup-window" id="setup-box-1">
+            <div class="setup-header">Install Windows 7 Ultimate</div>
+            <div class="setup-body">
+                <h3>Welcome to Windows 7 Installation Simulator</h3>
+                <p>Click "Begin Installation" to load virtual system parameters and extract OS directory packages into the runtime simulation context.</p>
+                <br><br>
+                <button class="setup-btn" style="float:right;" onclick="startInstallationLoop()">Begin Installation</button>
+            </div>
+        </div>
+        
+        <div class="setup-window" id="setup-box-2" style="display:none;">
+            <div class="setup-header">Installing Windows...</div>
+            <div class="setup-body">
+                <p id="install-status">Expanding temporary system variables...</p>
+                <div class="progress-container">
+                    <div class="progress-bar" id="install-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. INTERACTIVE SIMULATOR ENVIRONMENT DESKTOP -->
+    <div id="desktop-environment">
+        
+        <!-- CONTROL PANEL WORKSPACE APPLICATION PANEL (PRE-HOOKED) -->
+        <div id="win-control-panel" class="window" onmousedown="focusWindow('win-control-panel')">
+            <div class="window-header" onmousedown="dragStart(event)">
+                <span>Control Panel</span>
+                <div class="window-controls">
+                    <button class="close-btn" onclick="closeWindow('win-control-panel')">X</button>
+                </div>
+            </div>
+            <div class="window-body">
+                <h4 style="margin-top:0;">Personalization (Themes)</h4>
+                <p>Select a structural theme matrix backdrop below:</p>
+                <button class="setup-btn" onclick="setSystemTheme('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920')">Default Glass Aura</button>
+                <button class="setup-btn" onclick="setSystemTheme('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?q=80&w=1920')">Aero Sunset Gradient</button>
+                <button class="setup-btn" onclick="setSystemTheme('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1920')">Windows 7 Architecture Beach</button>
+            </div>
+        </div>
+
+        <!-- REUSE APP SHELL TEMPLATES FOR REMAINING APPLICATIONS -->
+        <!-- Applications will be structurally added inside this frame in Phase 2 -->
+
+        <!-- START SYSTEM DRAWER OVERLAY PANEL -->
+        <div class="start-menu" id="startMenu">
+            <div class="start-menu-inner">
+                <div class="start-left">
+                    <div class="start-item" onclick="openWindow('win-control-panel'); toggleStartMenu();">⚙️ Control Panel</div>
+                    <!-- Future hooks for Notepad, Calc, Paint will connect here -->
+                </div>
+                <div class="start-right">
+                    <strong style="color:#1e395b;">User-PC</strong>
+                    <hr style="width:100%; border:0; border-top:1px solid #ccc;">
+                    <span>Documents</span>
+                    <span>Pictures</span>
+                    <span>Games</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOWER SCREEN LAYER NAVIGATION TASKBAR -->
+        <div class="taskbar">
+            <div class="start-orb" onclick="toggleStartMenu()">
+                <span class="start-orb-flag">❖</span>
+            </div>
+            <div class="system-tray" id="clock">12:00 PM</div>
+        </div>
+    </div>
+
+    <script>
+        // Trigger automated transition sequence from BIOS boot loop down to installation menu setup
+        setTimeout(function() {
+            document.getElementById('boot-screen').style.display = 'none';
+            document.getElementById('setup-screen').style.display = 'flex';
+        }, 4000);
+
+        function startInstallationLoop() {
+            document.getElementById('setup-box-1').style.display = 'none';
+            document.getElementById('setup-box-2').style.display = 'block';
+            
+            var progress = 0;
+            var bar = document.getElementById('install-bar');
+            var status = document.getElementById('install-status');
+            
+            var stages = [
+                "Copying temporary initialization matrix...",
+                "Expanding core desktop registry indexes...",
+                "Configuring Aero rendering stylesheets...",
+                "Completing installation sequences..."
+            ];
+
+            var interval = setInterval(function() {
+                progress += 1;
+                bar.style.width = progress + '%';
+                
+                if(progress === 25) status.innerText = stages[1];
+                if(progress === 60) status.innerText = stages[2];
+                if(progress === 85) status.innerText = stages[3];
+
+                if(progress >= 100) {
+                    clearInterval(interval);
+                    document.getElementById('setup-screen').style.display = 'none';
+                    document.getElementById('desktop-environment').style.display = 'block';
+                }
+            }, 50);
+        }
+
+        // Window Tracking Logic Matrix
+        function toggleStartMenu() {
+            var m = document.getElementById('startMenu');
+            m.style.display = (m.style.display === 'block') ? 'none' : 'block';
+        }
+        function openWindow(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
+        
+        function focusWindow(id) {
+            var wins = document.querySelectorAll('.window');
+            for(var i=0; i<wins.length; i++) wins[i].style.zIndex = 10;
+            document.getElementById(id).style.zIndex = 11;
+        }
+
+        function setSystemTheme(url) {
+            document.getElementById('desktop-environment').style.backgroundImage = "url('" + url + "')";
+        }
+
+        // Live Operating Clock Loop Thread
+        function runClock() {
+            var d = new Date();
+            var h = d.getHours(), m = d.getMinutes(), am = h >= 12 ? 'PM' : 'AM';
+            h = h % 12; h = h ? h : 12;
+            m = m < 10 ? '0'+m : m;
+            document.getElementById('clock').innerText = h + ':' + m + ' ' + am;
+        }
+        setInterval(runClock, 1000); runClock();
+
+        // Native Drag Framework Hook Handler
+        var activeWin = null, ox = 0, oy = 0;
+        function dragStart(e) {
+            activeWin = e.currentTarget.parentNode;
+            focusWindow(activeWin.id);
+            ox = e.clientX - activeWin.offsetLeft;
+            oy = e.clientY - activeWin.offsetTop;
+            document.addEventListener('mousemove', dragMove);
+            document.addEventListener('mouseup', dragStop);
+        }
+        function dragMove(e) { if(activeWin) { activeWin.style.left = (e.clientX - ox)+'px'; activeWin.style.top = (e.clientY - oy)+'px'; } }
+        function dragStop() { activeWin = null; document.removeEventListener('mousemove', dragMove); document.removeEventListener('mouseup', dragStop); }
+    </script>
+</body>
+</html>
