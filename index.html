@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Windows 7 Ultimate Simulator</title>
+    <title>Windows 7 Ultimate</title>
     <style>
         * { box-sizing: border-box; user-select: none; -ms-user-select: none; font-family: "Segoe UI", Arial, sans-serif; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #000; }
 
-        /* ================= 1. BOOT & SCREEN LIFECYCLES ================= */
+        /* ================= 1. BOOT LIFECYCLE ================= */
         #boot-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: black; display: flex; flex-direction: column;
@@ -27,105 +27,129 @@
             0%, 100% { opacity: 0; transform: scale(0.6); filter: blur(5px); }
             50% { opacity: 0.9; transform: scale(1.1); filter: blur(2px); box-shadow: 0 0 15px white; }
         }
-        .boot-text { color: white; font-size: 20px; letter-spacing: 1px; font-weight: 300; margin-top: 20px; }
+        .boot-text { color: white; font-size: 22px; font-weight: 300; margin-top: 20px; font-family: "Segoe UI Light", "Segoe UI", sans-serif; }
 
-        /* ================= 2. INSTALL & UPDATE WIZARDS ================= */
-        #setup-screen, #update-screen {
+        /* ================= 2. INSTALLATION SCREEN ================= */
+        #setup-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(135deg, #1d5893 0%, #092147 100%);
             display: none; align-items: center; justify-content: center; z-index: 9990;
         }
         .setup-window {
             width: 550px; background-color: #f0f0f0; border-radius: 5px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid #666;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; border: 1px solid #555;
         }
-        .setup-header { background: linear-gradient(to bottom, #7abcff 0%, #4096ee 100%); color: white; padding: 10px 15px; font-weight: bold; }
-        .setup-body { padding: 30px; color: #333; }
+        .setup-header { background: linear-gradient(to bottom, #7abcff 0%, #4096ee 100%); color: white; padding: 10px 15px; font-weight: bold; font-size: 13px; }
+        .setup-body { padding: 30px; color: #333; font-size: 13px; }
         .progress-container { width: 100%; background-color: #e0e0e0; height: 22px; border-radius: 3px; border: 1px solid #ccc; overflow: hidden; margin-top: 20px; }
         .progress-bar { width: 0%; height: 100%; background: linear-gradient(to bottom, #a1db58 0%, #60bb20 100%); }
         .setup-btn {
             background: linear-gradient(to bottom, #ffffff 0%, #e0e0e0 100%);
-            border: 1px solid #707070; padding: 6px 15px; cursor: pointer; border-radius: 3px; font-size: 12px; margin: 2px;
+            border: 1px solid #707070; padding: 5px 15px; cursor: pointer; border-radius: 3px; font-size: 12px; margin: 2px;
+            box-shadow: inset 0 1px 0 white;
         }
         .setup-btn:hover { background: linear-gradient(to bottom, #eaf2fb 0%, #b7d5f5 100%); border-color: #3c7fb1; }
 
         /* ================= 3. WINDOWS 7 AUTHENTIC LOCK SCREEN ================= */
         #lock-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(135deg, #0f3b6c 0%, #2a7fbe 50%, #0f3b6c 100%);
+            background: radial-gradient(circle at center, #2e7bb6 0%, #0c3358 100%);
             display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 9950; color: white;
         }
-        .user-auth-card { text-align: center; background: rgba(255,255,255,0.1); padding: 30px; border-radius: 10px; backdrop-filter: blur(10px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .user-avatar { width: 90px; height: 90px; background: #ddd; border-radius: 8px; margin: 0 auto 15px auto; border: 2px solid white; font-size: 50px; line-height: 90px; }
-        .user-select-list { display: flex; gap: 15px; margin-top: 20px; background: rgba(0,0,0,0.2); padding: 10px; border-radius: 5px; }
-        .user-chip { padding: 5px 10px; background: rgba(255,255,255,0.2); border-radius: 3px; cursor: pointer; font-size: 12px; }
-        .user-chip:hover { background: #4096ee; }
+        .user-auth-card { text-align: center; }
+        .user-avatar { width: 96px; height: 96px; background: #fff; border-radius: 10px; margin: 0 auto 15px auto; border: 4px solid rgba(255,255,255,0.4); font-size: 55px; line-height: 88px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .user-select-list { position: absolute; bottom: 40px; display: flex; gap: 15px; background: rgba(0,0,0,0.15); padding: 10px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .user-chip { padding: 6px 14px; background: rgba(255,255,255,0.1); border-radius: 12px; cursor: pointer; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
+        .user-chip:hover { background: rgba(255,255,255,0.3); transform: translateY(-2px); }
 
-        /* ================= 4. DESKTOP RUNTIME PLATFORM ================= */
+        /* ================= 4. TRUE DESKTOP INTERFACE ================= */
         #desktop-environment {
             position: relative; width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1920') no-repeat center center;
+            background: url('https://i.imgur.com/W469Aon.jpg') no-repeat center center; /* Original Win 7 Harmony Wallpaper */
             background-size: cover; display: none;
         }
 
-        /* Aero Window Layout Structure */
+        /* Desktop Grid Icons */
+        .desktop-shortcuts { position: absolute; top: 10px; left: 10px; display: flex; flex-direction: column; gap: 4px; z-index: 5; }
+        .desktop-icon { width: 76px; height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; cursor: pointer; border: 1px solid transparent; border-radius: 3px; }
+        .desktop-icon:hover { background: rgba(255, 255, 255, 0.2); border-color: rgba(255,255,255,0.3); box-shadow: inset 0 0 5px rgba(255,255,255,0.2); }
+        .desktop-icon-img { font-size: 30px; margin-bottom: 4px; filter: drop-shadow(0px 2px 3px rgba(0,0,0,0.5)); }
+        .desktop-icon-text { color: white; font-size: 11px; text-shadow: 1px 1px 3px rgba(0,0,0,0.9), 0px 1px 2px rgba(0,0,0,1); font-weight: 500; padding: 0 2px; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+
+        /* Genuine Aero Glass Window */
         .window {
-            position: absolute; top: 120px; left: 160px; width: 480px; height: 340px;
-            background: rgba(240, 245, 255, 0.9); border-radius: 7px 7px 0 0;
-            border: 1px solid rgba(255,255,255,0.4); box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            display: none; flex-direction: column; z-index: 10; backdrop-filter: blur(8px);
-        }
+            position: absolute; top: 100px; left: 180px; width: 500px; height: 360px;
+            background: rgba(220, 235, 255, 0.55); border-radius: 6px 6px 0 0;
+            border: 1px solid rgba(255,255,255,0.5); box-shadow: 0 10px 30px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.5);
+            display: none; flex-direction: column; z-index: 10; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 5px 5px 0 5px;
+        </div>
         .window-header {
-            background: linear-gradient(to bottom, rgba(255,255,255,0.6) 0%, rgba(200,220,245,0.4) 100%);
-            padding: 8px 12px; font-size: 13px; font-weight: 500; color: #1e395b;
-            display: flex; justify-content: space-between; align-items: center; cursor: move;
+            padding: 4px 8px 8px 4px; font-size: 12px; font-weight: bold; color: #1e395b;
+            text-shadow: 0 1px 1px rgba(255,255,255,0.6); display: flex; justify-content: space-between; align-items: center; cursor: move;
         }
-        .window-controls button { width: 24px; height: 18px; font-size: 11px; margin-left: 2px; background: #fff; border: 1px solid #aaa; border-radius: 2px; cursor: pointer; }
-        .window-controls .close-btn:hover { background-color: #e81123; color: white; }
-        .window-body { padding: 10px; background: white; flex: 1; margin: 0 4px 4px 4px; border: 1px solid #999; overflow: auto; }
+        .window-title-area { display: flex; align-items: center; gap: 6px; font-weight: 500; }
+        .window-controls { display: flex; gap: 3px; }
+        .window-controls button { width: 28px; height: 18px; font-size: 10px; background: rgba(255,255,255,0.3); border: 1px solid rgba(0,0,0,0.25); border-radius: 3px; cursor: pointer; color: #333; box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); }
+        .window-controls button:hover { background: rgba(255,255,255,0.6); }
+        .window-controls .close-btn:hover { background: linear-gradient(to bottom, #ff7a7a 0%, #d82323 100%); color: white; border-color: #a01010; }
+        .window-body { background: white; flex: 1; border: 1px solid #8294b5; overflow: auto; border-radius: 2px; }
 
-        /* App Specific Styles */
+        /* Explorer Layout */
         .explorer-row { display: flex; height: 100%; }
-        .explorer-sidebar { width: 30%; border-right: 1px solid #ccc; padding-right: 5px; font-size: 12px; }
-        .explorer-main { width: 70%; padding-left: 10px; }
-        .folder-item { display: inline-block; width: 70px; text-align: center; margin: 10px; cursor: pointer; font-size: 11px; }
-        .folder-icon { font-size: 32px; display: block; }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-top: 10px; }
-        .calc-screen { width: 100%; height: 40px; text-align: right; padding: 5px; font-size: 18px; font-family: monospace; }
+        .explorer-sidebar { width: 28%; background: #f4f7fc; border-right: 1px solid #d9e1f2; padding: 10px 6px; font-size: 12px; color: #444; }
+        .explorer-main { width: 72%; padding: 15px; }
+        .folder-item { display: inline-block; width: 75px; text-align: center; margin: 5px; cursor: pointer; font-size: 11px; color: #333; }
+        .folder-icon { font-size: 32px; display: block; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.15)); }
+        
+        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 10px; background: #edf2f8; }
+        .calc-screen { width: 100%; height: 45px; text-align: right; padding: 8px; font-size: 20px; font-family: monospace; border: 1px solid #95a5bd; }
 
-        /* Taskbar Layout */
+        /* Authentic Windows 7 Taskbar */
         .taskbar {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 40px;
-            background: linear-gradient(to bottom, rgba(200, 225, 255, 0.4) 0%, rgba(100, 150, 200, 0.2) 100%);
-            backdrop-filter: blur(12px); border-top: 1px solid rgba(255,255,255,0.4);
-            display: flex; align-items: center; justify-content: space-between; padding: 0 10px; z-index: 999;
+            background: linear-gradient(to bottom, rgba(220, 235, 255, 0.45) 0%, rgba(110, 155, 205, 0.3) 50%, rgba(70, 110, 160, 0.45) 100%);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.45);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 -2px 10px rgba(0,0,0,0.15);
+            display: flex; align-items: center; justify-content: space-between; z-index: 999;
         }
+        
+        /* The Perfect Start Orb Button */
         .start-orb {
-            width: 36px; height: 36px; border-radius: 50%;
-            background: radial-gradient(circle, #5caefd 0%, #1c529e 70%, #0a2046 100%);
-            border: 1px solid #3366cc; cursor: pointer; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 8px rgba(0,0,0,0.5); transition: transform 0.1s;
+            width: 38px; height: 38px; border-radius: 50%; margin-left: 3px; margin-top: -2px;
+            background: radial-gradient(circle at center, #54b2ff 0%, #155cb4 60%, #051a3a 100%);
+            border: 1px solid rgba(0,0,0,0.4); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.6), inset 0 2px 3px rgba(255,255,255,0.6), 0 0 4px rgba(84,178,255,0.4);
+            transition: all 0.1s;
         }
-        .start-orb:hover { transform: scale(1.05); }
-        .system-tray { background: rgba(255,255,255,0.2); padding: 4px 12px; color: white; font-size: 12px; border-radius: 3px; }
+        .start-orb:hover { box-shadow: 0 0 12px #60beff, inset 0 2px 3px rgba(255,255,255,0.8); transform: scale(1.02); }
+        .start-logo { width: 20px; height: 20px; }
 
-        /* Start Menu Interface Shell */
+        .system-tray { display: flex; align-items: center; height: 100%; gap: 10px; }
+        .clock-area { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); padding: 2px 10px; color: white; font-size: 11px; text-shadow: 1px 1px 2px black; border-radius: 3px; text-align: center; }
+        
+        /* Show Desktop Bar Button at the end of the Taskbar */
+        .show-desktop-btn { width: 14px; height: 100%; background: rgba(255,255,255,0.1); border-left: 1px solid rgba(0,0,0,0.2); box-shadow: inset 1px 0 0 rgba(255,255,255,0.2); cursor: pointer; }
+        .show-desktop-btn:hover { background: rgba(255,255,255,0.25); }
+
+        /* Exact Layout Aero Start Menu */
         .start-menu {
-            position: absolute; bottom: 42px; left: 5px; width: 380px; height: 450px;
-            background: rgba(235, 245, 255, 0.9); border: 1px solid rgba(255,255,255,0.5);
-            backdrop-filter: blur(15px); border-radius: 5px 5px 0 0; display: none; z-index: 998; padding: 6px;
+            position: absolute; bottom: 41px; left: 2px; width: 390px; height: 460px;
+            background: rgba(235, 245, 255, 0.88); border: 1px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 5px 5px 0 0;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.5); display: none; z-index: 998; padding: 6px;
         }
         .start-menu-inner { display: flex; width: 100%; height: 100%; }
-        .start-left { width: 60%; background: white; border-radius: 3px; padding: 5px; border: 1px solid #ccc; overflow-y: auto; }
-        .start-right { width: 40%; padding: 10px; display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; }
-        .start-item { padding: 6px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; display: flex; align-items: center; gap: 8px; color: #222; }
-        .start-item:hover { background: #b7d5f5; }
-        .power-bar { display: flex; justify-content: flex-end; gap: 4px; background: rgba(0,0,0,0.05); padding: 5px; border-radius: 3px; }
+        .start-left { width: 62%; background: white; border-radius: 3px 0 0 3px; padding: 6px; border: 1px solid #b8c6d9; overflow-y: auto; }
+        .start-right { width: 38%; padding: 12px 8px; display: flex; flex-direction: column; justify-content: space-between; font-size: 12px; background: linear-gradient(to right, rgba(255,255,255,0.0) 0%, rgba(0,0,0,0.03) 100%); }
+        .start-item { padding: 7px 8px; cursor: pointer; border-radius: 3px; font-size: 12px; display: flex; align-items: center; gap: 8px; color: #222; }
+        .start-item:hover { background: linear-gradient(to bottom, #edf4fc 0%, #cee3fc 100%); box-shadow: inset 0 1px 0 white, 0 1px 2px rgba(0,0,0,0.05); }
+        .start-right-item { color: #1e395b; font-weight: 500; text-shadow: 0 1px 0 rgba(255,255,255,0.6); padding: 5px 8px; border-radius: 3px; cursor: pointer; }
+        .start-right-item:hover { background: rgba(255,255,255,0.4); box-shadow: inset 0 1px 0 rgba(255,255,255,0.4); color: #000; }
+        .power-bar { display: flex; justify-content: flex-end; gap: 0; background: rgba(0,0,0,0.05); padding: 4px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-    <!-- 1. BOOT COMPONENT ENGINE -->
     <div id="boot-screen">
         <div class="logo-container">
             <div class="orb orb-red"></div>
@@ -136,81 +160,84 @@
         <div class="boot-text" id="boot-label">Starting Windows</div>
     </div>
 
-    <!-- 2. INSTALLATION STEP MODULE -->
     <div id="setup-screen">
         <div class="setup-window" id="setup-box-1">
             <div class="setup-header">Install Windows 7 Ultimate</div>
             <div class="setup-body">
-                <h3>Setup Wizard Deployment</h3>
-                <p>Click below to partition your simulated virtual partition drive blocks.</p>
-                <button class="setup-btn" style="float:right;" onclick="runDeploymentEngine(false)">Begin Installation</button>
+                <h3 style="margin-top:0;">Windows Installation Configuration</h3>
+                <p>Click below to parse the deployment image files into your localized runtime workspace.</p>
+                <br>
+                <button class="setup-btn" style="float:right;" onclick="runDeploymentEngine(false)">Next</button>
             </div>
         </div>
         <div class="setup-window" id="setup-box-2" style="display:none;">
-            <div class="setup-header">Processing System Packages...</div>
+            <div class="setup-header">Expanding Windows files...</div>
             <div class="setup-body">
-                <p id="install-status">Expanding runtime allocation arrays...</p>
+                <p id="install-status">Setting setup parameters...</p>
                 <div class="progress-container"><div class="progress-bar" id="install-bar"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. SYSTEM USER AUTHENTIC LOCK SCREEN FRAME -->
     <div id="lock-screen">
         <div class="user-auth-card">
             <div class="user-avatar">👤</div>
-            <h2 id="lock-username" style="margin: 5px 0;">Admin</h2>
-            <p style="font-size:12px; opacity:0.8; margin-bottom:15px;">Click to Enter System Thread</p>
-            <button class="setup-btn" onclick="unlockDesktopEnvironment()">Log In</button>
-            
-            <div class="user-select-list" id="lock-users-tray">
-                <!-- Profile node chips are written here dynamically -->
-            </div>
+            <h2 id="lock-username" style="margin: 5px 0; font-weight: 400; font-size: 24px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5)">Admin</h2>
+            <p style="font-size:12px; opacity:0.8; margin-bottom:15px; text-shadow: 1px 1px 2px black">Welcome</p>
+            <button class="setup-btn" style="padding:4px 25px;" onclick="unlockDesktopEnvironment()">Log In</button>
         </div>
+        <div class="user-select-list" id="lock-users-tray"></div>
     </div>
 
-    <!-- 4. ACTIVE WORKSPACE CONTAINER ENVIRONMENT -->
     <div id="desktop-environment">
         
-        <!-- APP 1: FILE EXPLORER ARCHETYPE CONTAINER -->
+        <div class="desktop-shortcuts">
+            <div class="desktop-icon" onclick="openWindow('win-explorer')">
+                <div class="desktop-icon-img">📁</div>
+                <div class="desktop-icon-text">Computer</div>
+            </div>
+            <div class="desktop-icon" onclick="openWindow('win-control-panel')">
+                <div class="desktop-icon-img">⚙️</div>
+                <div class="desktop-icon-text">Control Panel</div>
+            </div>
+        </div>
+
         <div id="win-explorer" class="window" onmousedown="focusWindow('win-explorer')">
             <div class="window-header" onmousedown="dragStart(event)">
-                <span>📂 Windows File Explorer</span>
+                <div class="window-title-area"><span>📁</span> Computer</div>
                 <div class="window-controls"><button class="close-btn" onclick="closeWindow('win-explorer')">X</button></div>
             </div>
             <div class="window-body">
                 <div class="explorer-row">
                     <div class="explorer-sidebar">
-                        <strong>Favorites</strong><br>
-                        🔹 Desktop<br>🔹 Downloads<br>🔹 Documents
+                        <strong>Desktop</strong><br>
+                        📁 Documents<br>📁 Downloads<br>📁 Music
                     </div>
                     <div class="explorer-main">
-                        <div class="folder-item" dblclick="alert('Root directory access restricted.')">
-                            <span class="folder-icon">📁</span>Local Disk (C:)
+                        <div class="folder-item" dblclick="alert('Folder is empty.')">
+                            <span class="folder-icon">💽</span>Local Disk (C:)
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- APP 2: NOTEPAD TEXT UTILITY -->
         <div id="win-notepad" class="window" onmousedown="focusWindow('win-notepad')">
             <div class="window-header" onmousedown="dragStart(event)">
-                <span>📝 Notepad</span>
+                <div class="window-title-area"><span>📝</span> Notepad</div>
                 <div class="window-controls"><button class="close-btn" onclick="closeWindow('win-notepad')">X</button></div>
             </div>
             <div class="window-body" style="padding:0;">
-                <textarea style="width:100%; height:100%; border:none; outline:none; resize:none; padding:10px; font-family:monospace;"></textarea>
+                <textarea style="width:100%; height:100%; border:none; outline:none; resize:none; padding:8px; font-family:monospace; font-size:13px;"></textarea>
             </div>
         </div>
 
-        <!-- APP 3: MATHEMATICAL CALCULATOR ENGINE -->
-        <div id="win-calc" class="window" onmousedown="focusWindow('win-calc')" style="width:280px; height:320px;">
+        <div id="win-calc" class="window" onmousedown="focusWindow('win-calc')" style="width:280px; height:330px;">
             <div class="window-header" onmousedown="dragStart(event)">
-                <span>🧮 Calculator</span>
+                <div class="window-title-area"><span>🧮</span> Calculator</div>
                 <div class="window-controls"><button class="close-btn" onclick="closeWindow('win-calc')">X</button></div>
             </div>
-            <div class="window-body">
+            <div class="window-body" style="background:#edf2f8;">
                 <input type="text" class="calc-screen" id="calc-display" value="0" readonly>
                 <div class="calc-grid">
                     <button class="setup-btn" onclick="clearCalc()">C</button>
@@ -233,16 +260,15 @@
             </div>
         </div>
 
-        <!-- APP 4: CALENDAR WORKSPACE DRAWER -->
-        <div id="win-calendar" class="window" onmousedown="focusWindow('win-calendar')" style="width:320px; height:300px;">
+        <div id="win-calendar" class="window" onmousedown="focusWindow('win-calendar')" style="width:310px; height:290px;">
             <div class="window-header" onmousedown="dragStart(event)">
-                <span>📅 Date and Time Calendar</span>
+                <div class="window-title-area"><span>📅</span> Calendar</div>
                 <div class="window-controls"><button class="close-btn" onclick="closeWindow('win-calendar')">X</button></div>
             </div>
-            <div class="window-body" style="text-align:center;">
-                <h3 id="cal-month" style="margin:5px 0;">June 2026</h3>
-                <table style="width:100%; font-size:12px; border-collapse:collapse;" border="1" bordercolor="#ccc">
-                    <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+            <div class="window-body" style="text-align:center; padding:8px;">
+                <h4 id="cal-month" style="margin:4px 0; color:#1e395b;">June 2026</h4>
+                <table style="width:100%; font-size:11px; border-collapse:collapse;" border="1" bordercolor="#e2eaf4">
+                    <tr style="background:#edf2f8;"><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
                     <tr><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
                     <tr><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
                     <tr><td style="background:#4096ee; color:white; font-weight:bold;">14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
@@ -252,67 +278,72 @@
             </div>
         </div>
 
-        <!-- APP 5: CONTROL PANEL (WITH INTEGRATED SERVICE HOOKS) -->
         <div id="win-control-panel" class="window" onmousedown="focusWindow('win-control-panel')">
             <div class="window-header" onmousedown="dragStart(event)">
-                <span>⚙️ Control Panel Configuration Hub</span>
+                <div class="window-title-area"><span>⚙️</span> Control Panel</div>
                 <div class="window-controls"><button class="close-btn" onclick="closeWindow('win-control-panel')">X</button></div>
             </div>
-            <div class="window-body">
-                <div style="background:#eef4fb; padding:8px; border-radius:4px; margin-bottom:10px;">
-                    <strong>👤 User Identity Profiles Manager</strong><br>
-                    <input type="text" id="username-input" placeholder="Change Active Account Name" style="font-size:11px; padding:3px; width:160px;">
-                    <button class="setup-btn" onclick="applyAccountNameUpdate()">Apply Profile Name</button>
-                    <br><br>
-                    <input type="text" id="new-user-input" placeholder="Create Brand New User Profile" style="font-size:11px; padding:3px; width:160px;">
-                    <button class="setup-btn" onclick="registerAlternativeUserProfile()">Register Extra User</button>
+            <div class="window-body" style="background:#f4f7fc; padding:12px;">
+                <div style="background:white; padding:10px; border:1px solid #d1d9e6; border-radius:3px; margin-bottom:10px;">
+                    <strong style="font-size:12px; color:#1e395b;">User Accounts</strong><br><br>
+                    <input type="text" id="username-input" placeholder="New Profile Name" style="font-size:11px; padding:4px; width:150px; border:1px solid #bbb;">
+                    <button class="setup-btn" onclick="applyAccountNameUpdate()">Rename Account</button>
+                    <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
+                    <input type="text" id="new-user-input" placeholder="Create Username" style="font-size:11px; padding:4px; width:150px; border:1px solid #bbb;">
+                    <button class="setup-btn" onclick="registerAlternativeUserProfile()">Add User Profile</button>
                 </div>
                 
-                <div style="background:#fff7e6; padding:8px; border-radius:4px; border:1px solid #ffcc66;">
-                    <strong>🔄 Windows Update Service Layer</strong><br>
-                    <p style="margin:3px 0; font-size:11px;">Status: Virtual Kernel updates pending deployment.</p>
-                    <button class="setup-btn" onclick="executeWindowsUpdateRoutine()">Check and Run Updates</button>
+                <div style="background:white; padding:10px; border:1px solid #d1d9e6; border-radius:3px;">
+                    <strong style="font-size:12px; color:#1e395b;">System Update Engine</strong>
+                    <p style="margin:5px 0; font-size:11px; color:#555;">Critical security system enhancements ready.</p>
+                    <button class="setup-btn" onclick="executeWindowsUpdateRoutine()">Run Windows Update</button>
                 </div>
             </div>
         </div>
 
-        <!-- MAIN SYSTEM ACCESS DESKTOP TASKBAR OVERLAY -->
         <div class="start-menu" id="startMenu">
             <div class="start-menu-inner">
                 <div class="start-left">
-                    <div class="start-item" onclick="openWindow('win-explorer'); toggleStartMenu();">📂 File Explorer</div>
-                    <div class="start-item" onclick="openWindow('win-notepad'); toggleStartMenu();">📝 Notepad</div>
-                    <div class="start-item" onclick="openWindow('win-calc'); toggleStartMenu();">🧮 Calculator</div>
-                    <div class="start-item" onclick="openWindow('win-calendar'); toggleStartMenu();">📅 Calendar</div>
-                    <div class="start-item" onclick="openWindow('win-control-panel'); toggleStartMenu();">⚙️ Control Panel</div>
+                    <div class="start-item" onclick="openWindow('win-explorer'); toggleStartMenu();"><span>Folder Icon 📂</span> Computer</div>
+                    <div class="start-item" onclick="openWindow('win-notepad'); toggleStartMenu();"><span>Notepad Icon 📝</span> Notepad</div>
+                    <div class="start-item" onclick="openWindow('win-calc'); toggleStartMenu();"><span>Calc Icon 🧮</span> Calculator</div>
+                    <div class="start-item" onclick="openWindow('win-calendar'); toggleStartMenu();"><span>Cal Icon 📅</span> Calendar</div>
+                    <div class="start-item" onclick="openWindow('win-control-panel'); toggleStartMenu();"><span>Control Panel Icon ⚙️</span> Control Panel</div>
                 </div>
                 <div class="start-right">
-                    <strong id="start-profile-lbl" style="color:#1e395b;">Admin</strong>
-                    <hr style="width:100%; border:0; border-top:1px solid #ccc; margin:5px 0;">
-                    <span>Documents</span>
-                    <span>Pictures</span>
+                    <strong id="start-profile-lbl" style="color:#1e395b; font-size:13px; padding-left:8px;">Admin</strong>
+                    <hr style="width:100%; border:0; border-top:1px solid rgba(0,0,0,0.1); margin:8px 0;">
+                    <div class="start-right-item" onclick="openWindow('win-explorer'); toggleStartMenu();">Documents</div>
+                    <div class="start-right-item" onclick="openWindow('win-explorer'); toggleStartMenu();">Pictures</div>
+                    <div class="start-right-item" onclick="openWindow('win-control-panel'); toggleStartMenu();">Control Panel</div>
                     <div style="flex:1;"></div>
                     <div class="power-bar">
-                        <button class="setup-btn" style="padding:2px 6px;" onclick="lockSystemSession()">🔒 Lock</button>
-                        <button class="setup-btn" style="padding:2px 6px;" onclick="triggerPowerCycle('Restarting')">🔄 Restart</button>
-                        <button class="setup-btn" style="padding:2px 6px; font-weight:bold;" onclick="triggerPowerCycle('Shutting Down')">🔴 Shut Down</button>
+                        <button class="setup-btn" style="border-radius:3px 0 0 3px; border-right:none; background:#fff;" onclick="lockSystemSession()">Lock</button>
+                        <button class="setup-btn" style="border-radius:0; border-right:none; background:#fff;" onclick="triggerPowerCycle('Restarting')">Restart</button>
+                        <button class="setup-btn" style="border-radius:0 3px 3px 0; font-weight:bold; background: linear-gradient(to bottom, #fff 0%, #e0e0e0 100%);" onclick="triggerPowerCycle('Shutting Down')">Shut Down</button>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="taskbar">
-            <div class="start-orb" onclick="toggleStartMenu()">❖</div>
-            <div class="system-tray" id="clock">12:00 PM</div>
+            <div class="start-orb" onclick="toggleStartMenu()">
+                <svg class="start-logo" viewBox="0 0 24 24">
+                    <path d="M2,5.27L9.45,4v7.3H2V5.27M2,12.7h7.45V20L2,18.73V12.7M10.45,3.87L22,2v9.3H10.45V3.87M10.45,12.7H22v7.3l-11.55-1.87V12.7Z" fill="#fff"/>
+                </svg>
+            </div>
+            <div class="system-tray">
+                <div class="clock-area" id="clock">12:00 PM</div>
+                <div class="show-desktop-btn" onclick="minimizeAllWindowsSafely()" title="Show Desktop"></div>
+            </div>
         </div>
     </div>
 
     <script>
-        // System Identity Arrays
         var userDatabase = ["Admin"];
         var currentActiveUser = "Admin";
 
-        // Initial Cold Boot Process Flow Execution
+        // Auto-run Boot Screen Timing
         setTimeout(function() {
             document.getElementById('boot-screen').style.display = 'none';
             document.getElementById('setup-screen').style.display = 'flex';
@@ -329,14 +360,12 @@
             var interval = setInterval(function() {
                 progress += 2;
                 bar.style.width = progress + '%';
-                status.innerText = "Extracting runtime dependencies... " + progress + "%";
+                status.innerText = "Expanding features... " + progress + "%";
 
                 if (progress >= 100) {
                     clearInterval(interval);
                     document.getElementById('setup-screen').style.display = 'none';
-                    
                     if (isUpdateRoutine) {
-                        // Reset layout flags after handling updates
                         document.getElementById('setup-box-2').style.display = 'none';
                         document.getElementById('setup-box-1').style.display = 'block';
                         bar.style.width = '0%';
@@ -345,10 +374,9 @@
                         lockSystemSession();
                     }
                 }
-            }, 40);
+            }, 30);
         }
 
-        // Authentication Framework Handlers
         function lockSystemSession() {
             document.getElementById('desktop-environment').style.display = 'none';
             document.getElementById('startMenu').style.display = 'none';
@@ -362,7 +390,6 @@
                 chip.onclick = function() { switchUserContext(user); };
                 tray.appendChild(chip);
             });
-
             switchUserContext(currentActiveUser);
             document.getElementById('lock-screen').style.display = 'flex';
         }
@@ -378,19 +405,15 @@
             document.getElementById('desktop-environment').style.display = 'block';
         }
 
-        // Control Panel Logic Blocks
         function applyAccountNameUpdate() {
             var val = document.getElementById('username-input').value.trim();
             if(val !== "") {
                 for(var i=0; i<userDatabase.length; i++) {
-                    if(userDatabase[i] === currentActiveUser) {
-                        userDatabase[i] = val;
-                        break;
-                    }
+                    if(userDatabase[i] === currentActiveUser) { userDatabase[i] = val; break; }
                 }
                 switchUserContext(val);
-                alert("Account registration name adjusted successfully!");
                 document.getElementById('username-input').value = "";
+                alert("Profile configuration modified!");
             }
         }
 
@@ -398,8 +421,8 @@
             var val = document.getElementById('new-user-input').value.trim();
             if(val !== "" && userDatabase.indexOf(val) === -1) {
                 userDatabase.push(val);
-                alert("Profile node: '" + val + "' injected into authentication registry mapping safely.");
                 document.getElementById('new-user-input').value = "";
+                alert("New profile setup saved successfully.");
                 lockSystemSession();
             }
         }
@@ -407,19 +430,17 @@
         function executeWindowsUpdateRoutine() {
             closeWindow('win-control-panel');
             document.getElementById('desktop-environment').style.display = 'none';
-            document.getElementById('setup-header').innerText = "Windows Update Architecture Service";
-            document.getElementById('install-status').innerText = "Analyzing existing thread models...";
+            document.getElementById('setup-box-1').querySelector('.setup-header').innerText = "Windows Update";
+            document.getElementById('install-status').innerText = "Analyzing files...";
             document.getElementById('setup-screen').style.display = 'flex';
             runDeploymentEngine(true);
         }
 
-        // Power Lifecycle Handler Routing
         function triggerPowerCycle(labeltext) {
             document.getElementById('desktop-environment').style.display = 'none';
             var bootLbl = document.getElementById('boot-label');
             bootLbl.innerText = labeltext;
             document.getElementById('boot-screen').style.display = 'flex';
-            
             if(labeltext === 'Restarting') {
                 setTimeout(function() {
                     bootLbl.innerText = "Starting Windows";
@@ -429,7 +450,6 @@
             }
         }
 
-        // General Workspace Draggable Window UI Functions
         function toggleStartMenu() { var m = document.getElementById('startMenu'); m.style.display = (m.style.display === 'block') ? 'none' : 'block'; }
         function openWindow(id) { document.getElementById(id).style.display = 'flex'; focusWindow(id); }
         function closeWindow(id) { document.getElementById(id).style.display = 'none'; }
@@ -438,18 +458,19 @@
             for(var i=0; i<wins.length; i++) wins[i].style.zIndex = 10;
             document.getElementById(id).style.zIndex = 11;
         }
+        function minimizeAllWindowsSafely() {
+            var wins = document.querySelectorAll('.window');
+            for(var i=0; i<wins.length; i++) wins[i].style.display = 'none';
+        }
 
-        // Live Operating Clock Process Loop Thread
         function runClock() {
             var d = new Date();
             var h = d.getHours(), m = d.getMinutes(), am = h >= 12 ? 'PM' : 'AM';
-            h = h % 12; h = h ? h : 12;
-            m = m < 10 ? '0'+m : m;
+            h = h % 12; h = h ? h : 12; m = m < 10 ? '0'+m : m;
             document.getElementById('clock').innerText = h + ':' + m + ' ' + am;
         }
         setInterval(runClock, 1000); runClock();
 
-        // Mathematical Calculator Operations Processing Logic
         function clearCalc() { document.getElementById('calc-display').value = "0"; }
         function pressCalc(ch) {
             var scr = document.getElementById('calc-display');
@@ -460,7 +481,6 @@
             try { scr.value = eval(scr.value); } catch(e) { scr.value = "Error"; }
         }
 
-        // Native Drag Framework Pointer Processing Hook Handler
         var activeWin = null, ox = 0, oy = 0;
         function dragStart(e) {
             activeWin = e.currentTarget.parentNode;
